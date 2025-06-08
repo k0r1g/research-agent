@@ -1,6 +1,6 @@
 from datasets import load_dataset
 import random
-from resources import EXEMPLARS
+from resources.exemplars import EXEMPLARS
 
 # data = load_dataset('openai/gsm8k', 'main', split='train')
 # sample = data[0]
@@ -15,46 +15,7 @@ from resources import EXEMPLARS
 # print("answer:", answer)
 # answer_list = answer.split("#### ")
 # print("answer list:", answer_list)
-
-
-# import sys
-# import os
-# sys.path.append(os.getcwd())
-# from resources.exemplars import EXEMPLARS
-# from resources.exemplars import EXEMPLARS
-# examples = EXEMPLARS
-# examples = random.sample(examples, 8)
-# print(examples)
-
-# #format sample 
-# def format_example(example): 
-#     question = example["question"]
-#     answer = example["answer"]
-#     answer = answer.replace("\n", " ")
-#     #regex to match <<anything>>
-#     answer = re.sub(f"<<.*?>>", "", answer)
     
-#     if "####" in answer: 
-#         answer_list = answer.split("#### ")
-#         reasoning = answer_list[0].strip()
-#         answer = answer_list[1].strip()
-#     else: 
-#         reasoning = answer.strip()
-#         answer = ""
-    
-#     example = f"Question: {question} \n Solution: Let's think step by step. {reasoning} \n #### The final answer is {answer}"
-    
-#     return example
-    
-
-# format_example(sample)
-
-
-
-# def load_dataset(self): 
-    
-
-
 
 class GSM8K: 
     def __init__(self, split, include_answer=True, include_reasoning=True, few_shot=False, num_shots=8, seed=None, cot=False, template="qa"):
@@ -179,4 +140,23 @@ class GSM8K:
         dataset = dataset.map(self.process_example, with_indices=True, load_from_cache_file=False)
         
         return dataset 
-        
+
+
+if __name__ == "__main__": 
+    #test no cot, no few shot 
+    gsm_test = GSM8K(split="train[:5]", few_shot=False, cot=True)
+    gsm_test_ds = gsm_test.dataset
+    print("Datset Length:", len(gsm_test_ds))
+    print("Output:", gsm_test_ds[0]["prompt"])
+    
+    #few shot learning 
+    gsm_test = GSM8K(split= "train[:5]", few_shot=True, num_shots=2, cot=True)
+    gsm_test_ds = gsm_test.dataset
+    
+    print("Few Shot dataset:", gsm_test.dataset[0]["prompt"])
+    
+    
+    #no reasoning, no cot 
+    gsm_test = GSM8K(split="train[:5]", include_reasoning=False)
+    gsm_test_ds = gsm_test.dataset 
+    print("Output:", gsm_test_ds[0]["prompt"])
